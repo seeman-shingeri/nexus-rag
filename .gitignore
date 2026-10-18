@@ -61,6 +61,7 @@ backend/storage/evidence/*
 !backend/storage/evidence/.gitkeep
 backend/storage/documents/*
 !backend/storage/documents/.gitkeep
+!backend/storage/documents/*.md
 
 # IDEs & System
 .vscode/
