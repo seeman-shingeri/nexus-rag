@@ -159,4 +159,54 @@ export interface RuleSimulationResult {
   simulation_notes: string;
 }
 
+export interface TwinObject {
+  id: number;
+  zone_id: number;
+  name: string;
+  object_type: string;
+  expected_present: boolean;
+  is_discrepancy: boolean;
+  discrepancy_details?: string | null;
+  last_verified_at: string;
+}
+
+export interface ZoneDiscrepancy {
+  id: string;
+  zone_id: number;
+  zone_name: string;
+  discrepancy_type: string;
+  severity: string;
+  description: string;
+  detected_at: string;
+  confidence: number;
+  recommended_action: string;
+}
+
+export interface ZoneSummary {
+  id: number;
+  name: string;
+  description?: string | null;
+  risk_level: string;
+  is_restricted: boolean;
+  max_occupancy: number;
+  current_occupancy: number;
+  expected_conditions?: string | null;
+  polygon_coords?: string | null;
+  status: 'OPTIMAL' | 'CAUTION' | 'ANOMALY_DETECTED';
+  camera_count: number;
+  active_discrepancies: ZoneDiscrepancy[];
+  objects: TwinObject[];
+  last_telemetry_at?: string | null;
+}
+
+export interface DigitalTwinOverview {
+  zones: ZoneSummary[];
+  total_zones: number;
+  restricted_zones_count: number;
+  total_discrepancies: number;
+  facility_status: 'OPTIMAL' | 'ELEVATED_RISK' | 'CRITICAL_ALERT';
+  evaluated_at: string;
+}
+
+
 

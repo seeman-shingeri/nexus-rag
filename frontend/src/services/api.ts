@@ -7,8 +7,11 @@ import {
   User, 
   IncidentItem, 
   SafetyRule, 
-  RuleSimulationResult 
+  RuleSimulationResult,
+  DigitalTwinOverview,
+  ZoneSummary
 } from '../types';
+
 
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -139,6 +142,23 @@ export const api = {
     const res = await apiClient.post('/safety-rules/simulate', payload);
     return res.data;
   },
+
+  // Digital Twin
+  getDigitalTwinState: async (): Promise<DigitalTwinOverview> => {
+    const res = await apiClient.get('/digital-twin/state');
+    return res.data;
+  },
+
+  getZoneDetail: async (zoneId: number): Promise<ZoneSummary> => {
+    const res = await apiClient.get(`/digital-twin/zones/${zoneId}`);
+    return res.data;
+  },
+
+  evaluateDigitalTwin: async (): Promise<DigitalTwinOverview> => {
+    const res = await apiClient.post('/digital-twin/evaluate');
+    return res.data;
+  },
 };
+
 
 
