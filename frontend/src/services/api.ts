@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SystemStatus, DocumentItem, DocumentDetail, RAGAnswer, User } from '../types';
+import { SystemStatus, DocumentItem, DocumentDetail, RAGAnswer, User, IncidentItem } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -74,4 +74,28 @@ export const api = {
     });
     return res.data;
   },
+
+  // Incidents
+  getIncidents: async (params?: { status?: string; severity?: string; limit?: number }): Promise<IncidentItem[]> => {
+
+    const res = await apiClient.get('/incidents', { params });
+    return res.data;
+  },
+
+  getIncidentDetail: async (id: number) => {
+    const res = await apiClient.get(`/incidents/${id}`);
+    return res.data;
+  },
+
+  updateIncidentStatus: async (id: number, data: { status: string; notes?: string; assigned_to?: string }) => {
+    const res = await apiClient.patch(`/incidents/${id}/status`, data);
+    return res.data;
+  },
+
+  // Temporal Events
+  getTemporalEvents: async (params: { start_time: string; end_time: string; zone_id?: number; category?: string }) => {
+    const res = await apiClient.get('/events/temporal', { params });
+    return res.data;
+  },
 };
+

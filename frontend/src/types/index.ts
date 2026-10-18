@@ -83,3 +83,46 @@ export type ActiveScreen =
   | 'twin' 
   | 'rules' 
   | 'settings';
+
+export type IncidentStatus = 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED' | 'DISMISSED';
+export type RuleSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface IncidentItem {
+  id: number;
+  title: string;
+  rule_id: number;
+  event_id: number;
+  zone_id?: number | null;
+  camera_id: number;
+  severity: RuleSeverity;
+  status: IncidentStatus;
+  observation_summary: string;
+  evidence_path?: string | null;
+  confidence: number;
+  retrieved_procedure?: string | null;
+  citation_source?: string | null;
+  recommended_action: string;
+  occurrence_count: number;
+  assigned_to?: string | null;
+  acknowledged_by?: string | null;
+  acknowledged_at?: string | null;
+  resolved_by?: string | null;
+  resolved_at?: string | null;
+  resolution_notes?: string | null;
+  is_demo: boolean;
+  last_detected_at: string;
+  created_at: string;
+}
+
+export interface TemporalEvent {
+  id: number;
+  camera_id: number;
+  zone_id?: number | null;
+  category: string;
+  confidence: number;
+  bounding_box: number[];
+  evidence_path?: string | null;
+  timestamp: string;
+  requires_review: boolean;
+}
+
