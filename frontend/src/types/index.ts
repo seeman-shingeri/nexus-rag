@@ -126,3 +126,37 @@ export interface TemporalEvent {
   requires_review: boolean;
 }
 
+export interface SafetyRule {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  severity: RuleSeverity;
+  confidence_threshold: number;
+  persistence_seconds: number;
+  cooldown_minutes: number;
+  zone_id?: number | null;
+  is_active: boolean;
+  requires_human_approval: boolean;
+  standard_procedure: string;
+  created_at: string;
+}
+
+export interface RuleSimulationResult {
+  matched_rule_id?: number | null;
+  matched_rule_name?: string | null;
+  severity?: RuleSeverity | null;
+  confidence_met: boolean;
+  persistence_met: boolean;
+  alert_triggered: boolean;
+  required_confidence: number;
+  observed_confidence: number;
+  required_persistence_seconds: number;
+  observed_duration_seconds: number;
+  linked_sop_excerpt?: string | null;
+  citation_source?: string | null;
+  recommended_action: string;
+  simulation_notes: string;
+}
+
+

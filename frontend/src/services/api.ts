@@ -1,5 +1,15 @@
 import axios from 'axios';
-import { SystemStatus, DocumentItem, DocumentDetail, RAGAnswer, User, IncidentItem } from '../types';
+import { 
+  SystemStatus, 
+  DocumentItem, 
+  DocumentDetail, 
+  RAGAnswer, 
+  User, 
+  IncidentItem, 
+  SafetyRule, 
+  RuleSimulationResult 
+} from '../types';
+
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -97,5 +107,38 @@ export const api = {
     const res = await apiClient.get('/events/temporal', { params });
     return res.data;
   },
+
+  // Safety Rules
+  getSafetyRules: async (params?: { category?: string; severity?: string; is_active?: boolean }): Promise<SafetyRule[]> => {
+    const res = await apiClient.get('/safety-rules', { params });
+    return res.data;
+  },
+
+  createSafetyRule: async (data: Partial<SafetyRule>): Promise<SafetyRule> => {
+    const res = await apiClient.post('/safety-rules', data);
+    return res.data;
+  },
+
+  updateSafetyRule: async (id: number, data: Partial<SafetyRule>): Promise<SafetyRule> => {
+    const res = await apiClient.put(`/safety-rules/${id}`, data);
+    return res.data;
+  },
+
+  deleteSafetyRule: async (id: number): Promise<void> => {
+    await apiClient.delete(`/safety-rules/${id}`);
+  },
+
+  simulateSafetyRule: async (payload: {
+    category: string;
+    confidence: number;
+    duration_seconds: number;
+    zone_id?: number;
+    custom_confidence_threshold?: number;
+    custom_persistence_seconds?: number;
+  }): Promise<RuleSimulationResult> => {
+    const res = await apiClient.post('/safety-rules/simulate', payload);
+    return res.data;
+  },
 };
+
 
