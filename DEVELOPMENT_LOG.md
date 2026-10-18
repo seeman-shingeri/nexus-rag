@@ -136,5 +136,20 @@ This log maintains an audit trail of every logically independent contribution co
 - **Push Verification**: Verified on remote `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
 - **Status**: Completed and Verified
 
+### Milestone 9: System Settings, Optical Privacy Controls, and Immutable Audit Trail
+- **Date**: 2026-10-18
+- **Contribution**: `feat: implement security settings, privacy controls, and audit log viewer`
+- **Scope**:
+  - Implemented centralized governance service (`governance_service.py`) managing runtime model provider selection (`LOCAL_GROUNDED` vs `GOOGLE_GEMINI`), optical face/worker anonymization modes, and retention horizons.
+  - Implemented automated evidence retention policy execution (`execute_retention_purge`) purging obsolete detection artifacts while preserving structured incident and audit history.
+  - Implemented REST API endpoints (`/system/settings`, `/system/purge-retention`, `/audit/logs`, `/users`) protected with strict RBAC middleware.
+  - Authored automated test suite `test_settings_audit.py` verifying settings updates, role permission enforcement, retention purging, and audit logging.
+  - Built comprehensive production Settings page (`Settings.tsx`) featuring Operator Roster & RBAC capability matrix, AI Model Provider strategy selector with encrypted Gemini API key entry, Optical Privacy blurring toggle with customizable retention schedule slider, and searchable immutable Security Audit Log viewer.
+- **Automated Tests / Checks**: 32 backend tests passed in 35.02s; frontend production build (`npm run build`) succeeded in 4.09s.
+- **Commit Hash**: `f7901f415050884754c63f6aa48e3e7362e011c2`
+- **Push Verification**: Verified on remote `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
+- **Status**: Completed and Verified
+
+
 
 
