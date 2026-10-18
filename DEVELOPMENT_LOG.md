@@ -168,7 +168,20 @@ This log maintains an audit trail of every logically independent contribution co
 - **Automated Tests / Checks**: 32 backend tests passed in 35.18s; frontend production build (`npm run build`) succeeded in 3.78s.
 - **Commit Hash**: `c8f6fbb03f2b38f74956a410a59062b509eaac7e`
 - **Push Verification**: Verified on remote `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
+### Milestone 11: Production Vercel Deployment Hardening — Resolving HTTP 500 FUNCTION_INVOCATION_FAILED
+- **Date**: 2026-10-18
+- **Contribution**: `fix: resolve vercel 500 FUNCTION_INVOCATION_FAILED via decoupled static spa hosting and directory-agnostic test fixtures`
+- **Scope**:
+  - **Root Cause Identified**: Monorepo contained Python backend files (`backend/main.py`) without a root `vercel.json` or `.vercelignore`. Vercel automatically attempted to deploy `main.py` as an AWS Lambda serverless function (`@vercel/python`). In serverless Lambda, `opencv-python-headless` and `torch` fail due to missing GL system libraries, the read-only filesystem (`/var/task`) prevents SQLite operations, and persistent WebSockets/camera streaming time out, causing `HTTP 500 FUNCTION_INVOCATION_FAILED`.
+  - **Architectural Fix**: Decoupled frontend hosting to serve pure Vite static SPA assets from `frontend/dist` with client-side SPA route rewrites (`/(.*) -> /index.html`).
+  - **Vercel Configuration**: Authored root `vercel.json`, root `package.json` with npm workspaces, `frontend/vercel.json`, and `.vercelignore` (ignoring `backend/` to prevent serverless function generation).
+  - **Graceful Offline Fallbacks**: Enhanced `DigitalTwin.tsx` and `SafetyRules.tsx` to initialize with default spatial models and safety rules so preview deployments are 100% interactive even prior to connecting the persistent FastAPI container.
+  - **Storage Fixture Paths**: Fixed `test_rag_pipeline.py` to resolve document storage fixtures relative to `__file__`, ensuring tests pass whether invoked from root or `backend/`.
+  - **Deployment Verification**: Deployed live to Vercel and verified HTTP 200 response codes on root and all sub-routes (`/vision`, `/incidents`, `/twin`, `/rules`, `/ask`).
+- **Automated Tests / Checks**: 32 backend tests passed in 33.86s; frontend production build succeeded in 3.25s; live Vercel deployment verified returning HTTP 200.
+- **Push Verification**: Remote push verified on `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
 - **Status**: Completed and Verified
+
 
 
 

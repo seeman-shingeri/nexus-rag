@@ -68,3 +68,54 @@ volumes:
 - [ ] Set `DEMO_MODE=false` when deploying with physical production camera sensors.
 - [ ] Restrict CORS origins in backend `.env` to the specific corporate domain.
 - [ ] Verify automated evidence retention cron job runs nightly.
+
+---
+
+## 4. Vercel Frontend Deployment (Resolving FUNCTION_INVOCATION_FAILED)
+
+### Root Cause Analysis of `HTTP 500 FUNCTION_INVOCATION_FAILED`
+When deploying a full-stack monorepo containing Python backend files (`backend/main.py`) to Vercel without explicit frontend target configuration:
+1. **Serverless Runtime Incompatibility**: Vercel auto-detects Python files and attempts to deploy them as AWS Lambda serverless functions (`@vercel/python`).
+2. **Missing C-Libraries & Binary Bloat**: Libraries like `opencv-python-headless` and `torch` fail on serverless runtimes due to missing system GL libraries and Lambda package size limits (>250MB).
+3. **Read-Only Filesystem & Lifecycle Crashes**: Serverless Lambdas run on read-only filesystems (`/var/task`), crashing SQLite writes or startup lifespan initializations (`Base.metadata.create_all`).
+4. **WebSocket & Streaming Incompatibility**: Long-running camera streaming, continuous OpenCV video loops, and persistent WebSockets cannot run in ephemeral serverless execution.
+
+### The Decoupled Architecture Solution
+- **Vercel**: Hosts the **Vite React SPA** purely as optimized static assets with client-side SPA routing (`index.html` fallback).
+- **Persistent Backend Host**: Runs the **FastAPI + OpenCV + pgvector** service on Docker, Render, Railway, or AWS ECS.
+- **Frontend-Backend Binding**: Connect via the `VITE_API_URL` environment variable.
+
+### Vercel Configuration Files
+1. **Root `vercel.json`**:
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm --prefix frontend run build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
+
+2. **Root `.vercelignore`**:
+```
+backend
+docs
+.github
+*.db
+.pytest_cache
+```
+Prevents Vercel from scanning or creating serverless functions from backend Python files.
+
+3. **Frontend `frontend/vercel.json`**:
+Configured with Vite presets and SPA rewrites if deploying with Vercel's Root Directory setting set to `frontend`.
+
+### Vercel Environment Variables
+In your Vercel Project Settings > Environment Variables:
+- `VITE_API_URL`: `https://api.yourdomain.com/api/v1` (public address of your persistent FastAPI backend).
+

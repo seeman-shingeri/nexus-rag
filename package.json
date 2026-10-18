@@ -1,0 +1,15 @@
+{
+  "name": "nexus-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NEXUS - Multimodal RAG Safety Intelligence Platform",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev",
+    "start": "npm --prefix frontend run preview",
+    "test:frontend": "npm --prefix frontend run build"
+  }
+}

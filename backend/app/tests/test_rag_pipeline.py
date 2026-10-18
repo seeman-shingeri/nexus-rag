@@ -31,7 +31,8 @@ async def test_cosine_similarity_relevance():
 
 @pytest.mark.asyncio
 async def test_document_ingestion_and_chunking(db_session):
-    doc_path = os.path.join("storage", "documents", "SOP-ENV-204_Chemical_Spill_Response.md")
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    doc_path = os.path.join(base_dir, "storage", "documents", "SOP-ENV-204_Chemical_Spill_Response.md")
     assert os.path.exists(doc_path)
     
     doc = await RAGService.ingest_document(
@@ -61,7 +62,8 @@ async def test_document_ingestion_and_chunking(db_session):
 
 @pytest.mark.asyncio
 async def test_grounded_answer_and_citations(db_session):
-    doc_path = os.path.join("storage", "documents", "SOP-SEC-101_Chemical_Storage_Vault_Access.md")
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    doc_path = os.path.join(base_dir, "storage", "documents", "SOP-SEC-101_Chemical_Storage_Vault_Access.md")
     await RAGService.ingest_document(
         db=db_session,
         title="SOP-SEC-101: Vault Access",
