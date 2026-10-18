@@ -71,6 +71,21 @@ This log maintains an audit trail of every logically independent contribution co
   - Scaffolded routing for all 8 screens (`LiveVision`, `IncidentCenter`, `DigitalTwin`, `SafetyRules`, `Settings`).
   - Configured Axios API service client with automatic JWT bearer header injection.
 - **Automated Tests / Checks**: Frontend TypeScript compilation and production build (`npm run build`) succeeded in 3.23s.
+- **Commit Hash**: `25019bb020b37823f524c45158d1fa9937bc1d19`
+- **Push Verification**: Verified on remote `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
+- **Status**: Completed and Verified
+
+### Milestone 5: Webcam Integration, Optical Object Detection, Bounding Overlays, and Synthetic Demo Engine
+- **Date**: 2026-10-18
+- **Contribution**: `feat: integrate webcam object detection, bounding overlays, and synthetic demo streams`
+- **Scope**:
+  - Implemented OpenCV computer vision engine (`vision_service.py`) detecting people, liquid spills, missing hardhat PPE proxies, and egress obstructions.
+  - Built synthetic demo simulation stream generator producing animated realistic industrial scenarios with prominent `DEMO SIMULATION` watermarks.
+  - Implemented neon bounding box overlay renderer displaying confidence scores, class labels, and timestamps.
+  - Implemented Vision REST & WebSocket endpoints: `/vision/cameras`, `/vision/process-frame`, `/vision/demo-frame/{camera_id}`, and `/vision/ws`.
+  - Built interactive Live Vision component (`LiveVision.tsx`) with browser webcam capture (`getUserMedia`), camera selector, start/stop stream controls, latency meter, and real-time detection list.
+  - Authored automated test suite `test_vision_service.py` verifying frame encoding/decoding, demo generation, overlay rendering, and API endpoints.
+- **Automated Tests / Checks**: 21 backend tests passed in 21.75s; frontend production build succeeded in 3.63s.
 - **Commit Hash**: Pending commit
 - **Push Verification**: Pending push
 - **Status**: Completed
