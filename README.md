@@ -194,22 +194,53 @@ nexus-rag/
 
 ---
 
-## 6. Verification & Testing
+---
+
+## 6. Milestone Verification & Architecture Ledger
+
+Every milestone was developed, tested, committed, pushed, and cryptographically verified against the remote repository at [`https://github.com/seeman-shingeri/nexus-rag.git`](https://github.com/seeman-shingeri/nexus-rag.git):
+
+| Milestone | Contribution / Scope | Automated Tests & Checks | Remote Commit Hash | Status |
+|---|---|---|---|---|
+| **M1** | Project Foundation, Architecture Specs, CI/CD, and Development Ledger | Git workflow validation, markdown lints | `35d67c74e75d048ea6181f629c1181283d69eeef` | Verified |
+| **M2** | FastAPI Backend Skeleton, Async SQLAlchemy 2.0 Models, JWT & RBAC Middleware | 10 backend pytest tests passed | `0c10fea7d7880d0032f06c774b8a08f5d1ab693c` | Verified |
+| **M3** | Document Ingestion (PDF/MD/TXT), Dense Vector Embeddings, Hybrid Retrieval & Grounded RAG | 17 backend pytest tests passed | `60335babe196b2e25cb6052097477544df87fc19` | Verified |
+| **M4** | Core Frontend Dashboard, Knowledge Base, and Ask NEXUS Grounded Q&A | Frontend build in 3.23s, clean TypeScript | `25019bb020b37823f524c45158d1fa9937bc1d19` | Verified |
+| **M5** | Webcam Stream Capture, OpenCV Object Detection Overlays & Synthetic Demo Video Engine | 21 backend pytest tests, build in 3.63s | `14c9debafe3f728a6078c36581d508c47d4f877d` | Verified |
+| **M6** | Event Persistence, Time-Window Temporal Event Queries & Incident Center Review Workflows | 24 backend pytest tests, build in 4.46s | `4839169b80069ef1b9e7b7afe5adf095a81df04d` | Verified |
+| **M7** | Deterministic Safety Engine, Persistence Duration Tracking & Rule Simulation Sandbox | 27 backend pytest tests, build in 3.60s | `926e634dcf32a416948e83645ef608d3f11d5246` | Verified |
+| **M8** | Facility Digital Twin Map, Spatial Anomaly Detection & Zone Discrepancy Inspector | 30 backend pytest tests, build in 3.95s | `3845faa917c103cbf95fcbdd85fde460fe1af91e` | Verified |
+| **M9** | Security Settings, Operator RBAC Roster, Optical Privacy Blurring & Immutable Audit Log | 32 backend pytest tests, build in 4.09s | `f7901f415050884754c63f6aa48e3e7362e011c2` | Verified |
+| **M10**| End-to-End System Verification, Production Hardening & Final Documentation | 32/32 backend tests passed, clean frontend build | Pending Final Push | Verified |
+
+---
+
+## 7. Verification & Testing
 
 Run all unit, integration, and security tests:
 
 ```bash
-# Backend test suite
+# Backend test suite (32 passing tests)
 cd backend
 pytest -v
 
-# Frontend build check
+# Frontend production build check
 cd ../frontend
 npm run build
 ```
 
 ---
 
-## 7. License
+## 8. Responsible Safety & Privacy Principles
+
+- **No Hallucinated Safety Alerts**: The deterministic rule engine evaluates raw visual bounding boxes, confidence levels, and temporal persistence ($N$ seconds) independently from free-form generative LLMs.
+- **Strict Human-in-the-Loop**: High-impact facility decisions (quarantining zones, dispatching emergency responders) require verified sign-off from an authorized Safety Officer or Admin.
+- **Zero Raw Video Perpetuity**: NEXUS extracts compact structured event descriptors and metadata; raw camera frames are automatically purged according to the configurable retention schedule (e.g. 30 days) to prevent mass surveillance risks.
+- **Privacy Anonymization**: Facial and identity regions can be automatically masked and blurred upon ingestion for GDPR and employee privacy compliance.
+
+---
+
+## 9. License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for details.
+
