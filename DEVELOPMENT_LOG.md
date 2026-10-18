@@ -53,6 +53,24 @@ This log maintains an audit trail of every logically independent contribution co
   - Seeded 4 comprehensive compliance SOPs: `SOP-ENV-204` (Spills), `SOP-SEC-101` (Vault Access), `SOP-FIRE-008` (Egress), `SOP-PPE-003` (PPE Compliance).
   - Authored automated test suite `test_rag_pipeline.py` verifying embeddings, retrieval, citations, injection defense, refusal behavior, and API workflows.
 - **Automated Tests / Checks**: 17 total tests passed in 20.22s.
+- **Commit Hash**: `60335babe196b2e25cb6052097477544df87fc19`
+- **Push Verification**: Verified on remote `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
+- **Status**: Completed and Verified
+
+### Milestone 4: Core Frontend Dashboard, Knowledge Base Interface, and Ask NEXUS Workflow
+- **Date**: 2026-10-18
+- **Contribution**: `feat: implement core frontend dashboard, knowledge base interface, and ask nexus workflow`
+- **Scope**:
+  - Engineered futuristic AI operations center interface with dark navy styling, glowing neon accents, and responsive layout (React 19 + TypeScript + Vite + Tailwind CSS).
+  - Built Top Navigation Bar (`Navbar.tsx`) featuring real-time telemetry pills (Core Status, Active Cameras, LLM Model, Demo Stream badge, active user profile, and authentication modal).
+  - Built Collapsible Sidebar (`Sidebar.tsx`) connecting 8 operations screens with active route indicators, badge alerts, and latency ping meter.
+  - Implemented Operator Authentication Modal (`LoginModal.tsx`) with preset role switcher (`ADMIN`, `SAFETY_OFFICER`, `OPERATOR`) and JWT persistence.
+  - Implemented Screen 1: Central Operations Cockpit (`Dashboard.tsx`) with telemetry stats, optical sensor monitoring grid, and safety assurance matrix.
+  - Implemented Screen 3: Compliance Knowledge Base (`KnowledgeBase.tsx`) with drag-and-drop SOP uploading, real-time search, chunk detail drawer modal, and vector index purge.
+  - Implemented Screen 5: Ask NEXUS Grounded Q&A (`AskNexus.tsx`) with prompt starters, live message stream, expandable citation cards, confidence meter, and prompt injection security banners.
+  - Scaffolded routing for all 8 screens (`LiveVision`, `IncidentCenter`, `DigitalTwin`, `SafetyRules`, `Settings`).
+  - Configured Axios API service client with automatic JWT bearer header injection.
+- **Automated Tests / Checks**: Frontend TypeScript compilation and production build (`npm run build`) succeeded in 3.23s.
 - **Commit Hash**: Pending commit
 - **Push Verification**: Pending push
 - **Status**: Completed
