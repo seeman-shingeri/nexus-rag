@@ -9,8 +9,11 @@ import {
   SafetyRule, 
   RuleSimulationResult,
   DigitalTwinOverview,
-  ZoneSummary
+  ZoneSummary,
+  SystemSettings,
+  AuditLogEntry
 } from '../types';
+
 
 
 
@@ -158,7 +161,34 @@ export const api = {
     const res = await apiClient.post('/digital-twin/evaluate');
     return res.data;
   },
+
+  // System Settings & Governance
+  getSettings: async (): Promise<SystemSettings> => {
+    const res = await apiClient.get('/system/settings');
+    return res.data;
+  },
+
+  updateSettings: async (data: Partial<SystemSettings>): Promise<SystemSettings> => {
+    const res = await apiClient.put('/system/settings', data);
+    return res.data;
+  },
+
+  purgeRetention: async (): Promise<{ status: string; purged_records: number; message: string }> => {
+    const res = await apiClient.post('/system/purge-retention');
+    return res.data;
+  },
+
+  getAuditLogs: async (params?: { action?: string; user_id?: string; limit?: number }): Promise<AuditLogEntry[]> => {
+    const res = await apiClient.get('/audit/logs', { params });
+    return res.data;
+  },
+
+  getUsers: async (): Promise<User[]> => {
+    const res = await apiClient.get('/users');
+    return res.data;
+  },
 };
+
 
 
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, health, documents, vision, incidents, events, safety_rules, digital_twin
+from app.api.v1 import auth, health, documents, vision, incidents, events, safety_rules, digital_twin, settings
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
@@ -10,5 +10,7 @@ api_router.include_router(incidents.router)
 api_router.include_router(events.router)
 api_router.include_router(safety_rules.router)
 api_router.include_router(digital_twin.router)
+api_router.include_router(settings.router)
+
 
 

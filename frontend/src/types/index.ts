@@ -208,5 +208,27 @@ export interface DigitalTwinOverview {
   evaluated_at: string;
 }
 
+export interface SystemSettings {
+  llm_provider: string;
+  privacy_mode: string;
+  retention_days: number;
+  auto_purge_enabled: boolean;
+  gemini_api_key_configured: boolean;
+  gemini_api_key?: string;
+}
+
+
+export interface AuditLogEntry {
+  id: number;
+  user_id: string;
+  action: string;
+  resource_type: string;
+  resource_id?: string | null;
+  details?: string | null;
+  ip_address?: string | null;
+  timestamp: string;
+}
+
+
 
 
