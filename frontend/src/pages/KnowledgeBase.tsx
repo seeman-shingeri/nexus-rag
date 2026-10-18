@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  BookOpen, 
+  FileText, 
   Upload, 
   Trash2, 
-  FileText, 
   Search, 
   Eye, 
   AlertCircle, 
-  CheckCircle, 
+  CheckCircle2, 
   Clock, 
   Layers,
-  X
+  X,
+  RefreshCw,
+  Plus
 } from 'lucide-react';
 import { DocumentItem, DocumentDetail } from '../types';
 import { api } from '../services/api';
@@ -24,7 +25,8 @@ export const KnowledgeBase: React.FC = () => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [titleInput, setTitleInput] = useState('');
-  const [categoryInput, setCategoryInput] = useState('Safety Manual');
+  const [categoryInput, setCategoryInput] = useState('Safety SOP');
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   const fetchDocuments = async () => {
     try {
@@ -32,7 +34,7 @@ export const KnowledgeBase: React.FC = () => {
       const data = await api.getDocuments();
       setDocuments(data);
     } catch (err) {
-      console.error('Failed to fetch documents:', err);
+      console.warn('Failed to fetch documents from API');
     } finally {
       setLoading(false);
     }
@@ -45,6 +47,11 @@ export const KnowledgeBase: React.FC = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      setUploadError('File exceeds maximum allowed size of 20MB.');
+      return;
+    }
 
     setUploadError(null);
     setUploading(true);
@@ -59,6 +66,7 @@ export const KnowledgeBase: React.FC = () => {
     try {
       await api.uploadDocument(formData);
       setTitleInput('');
+      setIsUploadOpen(false);
       await fetchDocuments();
     } catch (err: any) {
       setUploadError(err.response?.data?.detail || 'Failed to upload and index document.');
@@ -74,14 +82,14 @@ export const KnowledgeBase: React.FC = () => {
       const detail = await api.getDocumentDetail(id);
       setSelectedDoc(detail);
     } catch (err) {
-      console.error('Failed to load document chunks:', err);
+      console.warn('Failed to load document chunks');
     } finally {
       setLoadingDetail(false);
     }
   };
 
   const handleDeleteDocument = async (id: number, title: string) => {
-    if (!window.confirm(`Permanently delete '${title}' and remove its vector embeddings?`)) {
+    if (!window.confirm(`Permanently remove document '${title}' and purge its vector embeddings from the database?`)) {
       return;
     }
     try {
@@ -91,7 +99,7 @@ export const KnowledgeBase: React.FC = () => {
       }
       await fetchDocuments();
     } catch (err) {
-      console.error('Failed to delete document:', err);
+      console.warn('Failed to delete document');
     }
   };
 
@@ -102,201 +110,230 @@ export const KnowledgeBase: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-[#0d1527] border border-slate-800">
+    <div className="space-y-4">
+      {/* Header bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2 text-violet-400 font-mono text-xs tracking-wider mb-1">
-            <BookOpen className="w-4 h-4" />
-            <span>GROUNDED COMPLIANCE ENGINE</span>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Compliance Knowledge Base</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Ingest, embed, and index Standard Operating Procedures (SOPs) for verifiable safety citations.
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900">Knowledge Base & Safety SOPs</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Ingest, vectorize, and index standard operating procedures for grounded retrieval in incident triage.
           </p>
         </div>
 
-        <div className="text-right">
-          <div className="text-2xl font-mono font-bold text-violet-300">{documents.length}</div>
-          <div className="text-xs font-mono text-slate-500">INDEXED MANUALS</div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsUploadOpen(!isUploadOpen)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium tracking-wide transition shadow-sm"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Upload Document</span>
+          </button>
         </div>
       </div>
 
-      {/* Upload Box */}
-      <div className="p-6 rounded-2xl bg-[#0d1527]/80 border border-dashed border-slate-700 hover:border-violet-500/60 transition">
-        <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-2">
-          <Upload className="w-4 h-4 text-violet-400" />
-          <span>INGEST NEW REGULATORY / SOP DOCUMENT</span>
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-          <input
-            type="text"
-            placeholder="Document Title (e.g., SOP-ENV-204 Spill Response)"
-            value={titleInput}
-            onChange={(e) => setTitleInput(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-slate-200 focus:outline-none focus:border-violet-500"
-          />
-
-          <select
-            value={categoryInput}
-            onChange={(e) => setCategoryInput(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-slate-200 focus:outline-none focus:border-violet-500"
-          >
-            <option value="Safety Manual">Safety Manual</option>
-            <option value="Chemical Safety">Chemical Safety</option>
-            <option value="Fire & Egress">Fire & Egress</option>
-            <option value="PPE Standards">PPE Standards</option>
-            <option value="Machinery Protocols">Machinery Protocols</option>
-          </select>
-
-          <label className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 cursor-pointer font-mono text-xs font-semibold text-white shadow-glow-violet transition">
-            <Upload className="w-4 h-4" />
-            <span>{uploading ? 'INDEXING...' : 'SELECT PDF, TXT, OR MD'}</span>
-            <input
-              type="file"
-              accept=".pdf,.txt,.md"
-              onChange={handleFileUpload}
-              disabled={uploading}
-              className="hidden"
-            />
-          </label>
-        </div>
-
-        {uploadError && (
-          <div className="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 text-xs flex items-center gap-2">
+      {uploadError && (
+        <div className="p-3 rounded bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{uploadError}</span>
           </div>
-        )}
-
-        <div className="text-[11px] font-mono text-slate-500">
-          Max file size: 10MB. Content is automatically split into semantic chunks and embedded into the hybrid vector index.
+          <button onClick={() => setUploadError(null)} className="text-red-500 hover:text-red-700">
+            <X className="w-4 h-4" />
+          </button>
         </div>
+      )}
+
+      {/* Upload Drawer / Section */}
+      {isUploadOpen && (
+        <div className="p-4 rounded-lg bg-white border border-slate-200 shadow-sm space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span className="text-xs font-semibold text-slate-900 uppercase font-mono">
+              Upload Standard Operating Procedure
+            </span>
+            <button onClick={() => setIsUploadOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Document Title (Optional)</label>
+              <input
+                type="text"
+                placeholder="e.g. SOP-ENV-204: Chemical Spill Response"
+                value={titleInput}
+                onChange={(e) => setTitleInput(e.target.value)}
+                className="w-full px-3 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Safety Category</label>
+              <select
+                value={categoryInput}
+                onChange={(e) => setCategoryInput(e.target.value)}
+                className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="Safety SOP">Safety SOP</option>
+                <option value="Chemical Safety">Chemical Safety</option>
+                <option value="Security Protocol">Security Protocol</option>
+                <option value="Fire & Egress">Fire & Egress</option>
+                <option value="Equipment Handling">Equipment Handling</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">File (PDF, MD, TXT - Max 20MB)</label>
+              <input
+                type="file"
+                accept=".pdf,.md,.txt,.markdown"
+                onChange={handleFileUpload}
+                disabled={uploading}
+                className="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-medium file:bg-slate-100 file:text-slate-800 hover:file:bg-slate-200"
+              />
+            </div>
+          </div>
+
+          {uploading && (
+            <div className="flex items-center gap-2 text-xs font-mono text-blue-700 pt-1">
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              <span>Extracting text, chunking into segments, and computing vector embeddings...</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Search Toolbar */}
+      <div className="flex items-center justify-between gap-3 p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Search indexed safety procedures by title, filename, or category..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 rounded border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-600"
+          />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+        </div>
+
+        <span className="text-xs font-mono text-slate-500 whitespace-nowrap">
+          {filteredDocs.length} Documents Registered
+        </span>
       </div>
 
-      {/* Search & Document List */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <input
-              type="text"
-              placeholder="Search documents by title, filename, or category..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 pl-9 rounded-lg bg-[#0d1527] border border-slate-800 text-xs font-mono text-slate-200 focus:outline-none focus:border-violet-500"
-            />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="p-12 text-center text-slate-500 font-mono text-xs">
-            Querying vector knowledge database...
-          </div>
-        ) : filteredDocs.length === 0 ? (
-          <div className="p-12 text-center rounded-2xl bg-[#0d1527] border border-slate-800 text-slate-400 font-mono text-xs">
-            No compliance documents found matching your search.
+      {/* Documents Table */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        {filteredDocs.length === 0 ? (
+          <div className="p-12 text-center text-slate-500 text-xs font-mono">
+            {loading ? 'Querying document vector database...' : 'No documents found matching search criteria.'}
           </div>
         ) : (
-          <div className="rounded-2xl bg-[#0d1527] border border-slate-800 overflow-hidden shadow-xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-slate-900/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider">
-                  <tr>
-                    <th className="py-3 px-4">Title & Filename</th>
-                    <th className="py-3 px-4">Category</th>
-                    <th className="py-3 px-4">Chunks</th>
-                    <th className="py-3 px-4">Size</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/80">
-                  {filteredDocs.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-slate-900/40 transition">
-                      <td className="py-3 px-4">
-                        <div className="font-semibold text-slate-200">{doc.title}</div>
-                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                          <FileText className="w-3 h-3" />
-                          <span>{doc.filename}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[11px]">
-                          {doc.category}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-500 bg-slate-50/60 font-mono text-[11px]">
+                  <th className="py-2.5 px-4 font-medium">Document Title</th>
+                  <th className="py-2.5 px-4 font-medium">Category</th>
+                  <th className="py-2.5 px-4 font-medium">Type</th>
+                  <th className="py-2.5 px-4 font-medium">Size</th>
+                  <th className="py-2.5 px-4 font-medium">Chunks</th>
+                  <th className="py-2.5 px-4 font-medium">Status</th>
+                  <th className="py-2.5 px-4 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {filteredDocs.map((doc) => (
+                  <tr key={doc.id} className="hover:bg-slate-50/50 transition">
+                    <td className="py-2.5 px-4">
+                      <div className="font-medium text-slate-900">{doc.title}</div>
+                      <div className="text-[11px] text-slate-500 font-mono">{doc.filename}</div>
+                    </td>
+                    <td className="py-2.5 px-4 font-mono text-[11px] text-slate-700">{doc.category}</td>
+                    <td className="py-2.5 px-4 font-mono text-[11px] uppercase text-slate-500">{doc.file_type}</td>
+                    <td className="py-2.5 px-4 font-mono text-[11px] text-slate-500">
+                      {(doc.file_size_bytes / 1024).toFixed(1)} KB
+                    </td>
+                    <td className="py-2.5 px-4 font-mono text-[11px] text-slate-800 font-semibold">
+                      {doc.chunk_count} Chunks
+                    </td>
+                    <td className="py-2.5 px-4">
+                      {doc.status === 'INDEXED' ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-700 font-medium">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          INDEXED
                         </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="text-violet-400 font-semibold">{doc.chunk_count}</span>
-                      </td>
-                      <td className="py-3 px-4 text-slate-400">
-                        {(doc.file_size_bytes / 1024).toFixed(1)} KB
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
-                          <CheckCircle className="w-3 h-3" />
-                          <span>{doc.status}</span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-mono text-amber-700 font-medium">
+                          <Clock className="w-3.5 h-3.5 text-amber-600" />
+                          {doc.status}
                         </span>
-                      </td>
-                      <td className="py-3 px-4 text-right space-x-2">
+                      )}
+                    </td>
+                    <td className="py-2.5 px-4">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleViewChunks(doc.id)}
-                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition inline-flex items-center gap-1"
-                          title="View Extracted Chunks"
+                          className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-medium transition"
                         >
-                          <Eye className="w-3 h-3" />
-                          <span>Chunks</span>
+                          Chunks
                         </button>
                         <button
                           onClick={() => handleDeleteDocument(doc.id, doc.title)}
-                          className="px-2.5 py-1 rounded bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 hover:text-rose-100 transition inline-flex items-center gap-1"
-                          title="Purge Document & Embeddings"
+                          className="p-1 rounded text-slate-400 hover:text-red-700 hover:bg-red-50 transition"
+                          title="Delete document"
                         >
-                          <Trash2 className="w-3 h-3" />
-                          <span>Purge</span>
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
 
-      {/* Chunk Detail Drawer */}
+      {/* Chunk Inspector Modal */}
       {selectedDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-3xl max-h-[85vh] rounded-2xl bg-[#0d1527] border border-slate-700 shadow-2xl flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/70">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-violet-400" />
-                <h3 className="font-mono text-sm font-bold text-slate-100">
-                  CHUNKS: {selectedDoc.title} ({selectedDoc.chunks.length})
-                </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-3xl max-h-[90vh] rounded-lg bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col">
+            <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 className="font-semibold text-sm text-slate-900">{selectedDoc.title}</h3>
+                <span className="text-[11px] font-mono text-slate-500">
+                  {selectedDoc.filename} · {selectedDoc.chunks.length} Extracted Vector Chunks
+                </span>
               </div>
               <button
                 onClick={() => setSelectedDoc(null)}
-                className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-slate-100 transition"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-4 overflow-y-auto space-y-3 flex-1 font-mono text-xs">
+            <div className="p-5 overflow-y-auto space-y-3">
               {selectedDoc.chunks.map((chunk) => (
-                <div key={chunk.id} className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 space-y-2">
-                  <div className="flex items-center justify-between text-[11px] text-slate-400">
-                    <span className="text-violet-400 font-bold">Chunk #{chunk.chunk_index}</span>
-                    <span>Tokens: {chunk.token_count} | Page/Sec: {chunk.page_number ?? '1'}</span>
+                <div key={chunk.id} className="p-3.5 rounded border border-slate-200 bg-slate-50/50 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between font-mono text-[11px] text-slate-500 border-b border-slate-200/60 pb-1">
+                    <span>Chunk #{chunk.chunk_index}</span>
+                    <span>Tokens: ~{chunk.token_count}</span>
                   </div>
-                  <p className="text-slate-300 font-sans leading-relaxed whitespace-pre-wrap">
+                  <p className="text-slate-800 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
                     {chunk.content}
                   </p>
                 </div>
               ))}
+            </div>
+
+            <div className="px-5 py-3 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                onClick={() => setSelectedDoc(null)}
+                className="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

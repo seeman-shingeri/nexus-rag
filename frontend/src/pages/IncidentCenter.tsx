@@ -45,8 +45,8 @@ export const IncidentCenter: React.FC = () => {
       const data = await api.getIncidents(params);
       setIncidents(data);
     } catch (err: any) {
-      console.error('Failed to fetch incidents:', err);
-      setError('Failed to load incidents. Please verify connection and authentication.');
+      console.warn('Using existing incident state or API offline');
+      setError('Unable to refresh live incidents from backend.');
     } finally {
       setLoading(false);
     }
@@ -94,445 +94,299 @@ export const IncidentCenter: React.FC = () => {
     );
   });
 
-  // Calculate statistics
-  const totalCount = incidents.length;
-  const openCount = incidents.filter((i) => i.status === 'OPEN').length;
-  const ackCount = incidents.filter((i) => i.status === 'ACKNOWLEDGED').length;
-  const resolvedCount = incidents.filter((i) => i.status === 'RESOLVED').length;
-
-  const getSeverityBadge = (severity: RuleSeverity) => {
-    switch (severity) {
+  const getSeverityBadge = (sev: string) => {
+    switch (sev) {
       case 'CRITICAL':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-500/50 shadow-glow-rose">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
-            CRITICAL
-          </span>
-        );
+        return <span className="inline-block px-2 py-0.5 text-[11px] font-mono font-medium rounded bg-red-50 text-red-700 border border-red-200">CRITICAL</span>;
       case 'HIGH':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-500/50">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            HIGH
-          </span>
-        );
+        return <span className="inline-block px-2 py-0.5 text-[11px] font-mono font-medium rounded bg-amber-50 text-amber-700 border border-amber-200">HIGH</span>;
       case 'MEDIUM':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-yellow-950/80 text-yellow-300 border border-yellow-500/50">
-            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
-            MEDIUM
-          </span>
-        );
-      case 'LOW':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/50">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            LOW
-          </span>
-        );
+        return <span className="inline-block px-2 py-0.5 text-[11px] font-mono font-medium rounded bg-blue-50 text-blue-700 border border-blue-200">MEDIUM</span>;
       default:
-        return null;
+        return <span className="inline-block px-2 py-0.5 text-[11px] font-mono font-medium rounded bg-slate-50 text-slate-700 border border-slate-200">{sev}</span>;
     }
   };
 
-  const getStatusBadge = (status: IncidentStatus) => {
-    switch (status) {
+  const getStatusBadge = (st: string) => {
+    switch (st) {
       case 'OPEN':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-semibold bg-red-950/60 text-red-400 border border-red-800">
-            <AlertCircle className="w-3 h-3" />
-            OPEN
-          </span>
-        );
+        return <span className="inline-block px-2 py-0.5 text-[11px] font-mono font-medium rounded bg-red-50 text-red-700 border border-red-200">OPEN</span>;
       case 'ACKNOWLEDGED':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-semibold bg-amber-950/60 text-amber-400 border border-amber-800">
-            <Clock className="w-3 h-3" />
-            ACKNOWLEDGED
-          </span>
-        );
+        return <span className="inline-block px-2 py-0.5 text-[11px] font-mono font-medium rounded bg-amber-50 text-amber-700 border border-amber-200">ACKNOWLEDGED</span>;
       case 'RESOLVED':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800">
-            <CheckCircle2 className="w-3 h-3" />
-            RESOLVED
-          </span>
-        );
-      case 'DISMISSED':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-semibold bg-slate-900 text-slate-400 border border-slate-700">
-            DISMISSED
-          </span>
-        );
+        return <span className="inline-block px-2 py-0.5 text-[11px] font-mono font-medium rounded bg-emerald-50 text-emerald-700 border border-emerald-200">RESOLVED</span>;
       default:
-        return null;
+        return <span className="inline-block px-2 py-0.5 text-[11px] font-mono font-medium rounded bg-slate-50 text-slate-700 border border-slate-200">{st}</span>;
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-[#0d1527] to-slate-900 border border-slate-800 shadow-xl">
+    <div className="space-y-4">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2 text-rose-400 font-mono text-xs tracking-wider mb-1">
-            <AlertTriangle className="w-4 h-4" />
-            <span>INCIDENT COMMAND & HUMAN REVIEW</span>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Incident Center</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Deterministic rule-triggered incidents with evidence snapshots, SOP compliance procedures, and authorization workflows.
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900">Incident Review & Triage Center</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Audit trail of verified safety anomalies, visual evidence records, and human-in-the-loop resolutions.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono text-slate-500">
+            {filteredIncidents.length} Records Found
+          </span>
           <button
             onClick={fetchIncidents}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-medium border border-slate-700 transition"
+            disabled={loading}
+            className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded border border-slate-200 transition"
+            title="Refresh incident list"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
           </button>
         </div>
       </div>
 
-      {/* KPI Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-[#0d1527] border border-slate-800">
-          <div className="text-xs font-mono text-slate-400">TOTAL INCIDENTS</div>
-          <div className="text-2xl font-bold font-mono text-white mt-1">{totalCount}</div>
-        </div>
-        <div className="p-4 rounded-xl bg-[#0d1527] border border-rose-900/40">
-          <div className="text-xs font-mono text-rose-400 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-            OPEN & UNRESOLVED
-          </div>
-          <div className="text-2xl font-bold font-mono text-rose-300 mt-1">{openCount}</div>
-        </div>
-        <div className="p-4 rounded-xl bg-[#0d1527] border border-amber-900/40">
-          <div className="text-xs font-mono text-amber-400">ACKNOWLEDGED</div>
-          <div className="text-2xl font-bold font-mono text-amber-300 mt-1">{ackCount}</div>
-        </div>
-        <div className="p-4 rounded-xl bg-[#0d1527] border border-emerald-900/40">
-          <div className="text-xs font-mono text-emerald-400">RESOLVED & VERIFIED</div>
-          <div className="text-2xl font-bold font-mono text-emerald-300 mt-1">{resolvedCount}</div>
-        </div>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 rounded-xl bg-[#0d1527] border border-slate-800">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-            <Filter className="w-3.5 h-3.5" />
-            <span>STATUS:</span>
-          </div>
-          {(['ALL', 'OPEN', 'ACKNOWLEDGED', 'RESOLVED', 'DISMISSED'] as const).map((st) => (
-            <button
-              key={st}
-              onClick={() => setSelectedStatus(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition ${
-                selectedStatus === st
-                  ? 'bg-cyan-500 text-slate-950 font-bold'
-                  : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-              }`}
-            >
-              {st}
-            </button>
-          ))}
-
-          <div className="h-4 w-[1px] bg-slate-800 mx-2 hidden lg:block" />
-
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-            <span>SEVERITY:</span>
-          </div>
-          {(['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] as const).map((sev) => (
-            <button
-              key={sev}
-              onClick={() => setSelectedSeverity(sev)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition ${
-                selectedSeverity === sev
-                  ? 'bg-rose-500 text-slate-950 font-bold'
-                  : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-              }`}
-            >
-              {sev}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative min-w-[240px]">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+      {/* Filter and Search Toolbar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+        {/* Search */}
+        <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Search incident, SOP, zone..."
+            placeholder="Search by title, procedure, or observation..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs font-mono rounded-lg bg-slate-900 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+            className="w-full pl-8 pr-3 py-1.5 rounded border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-600 font-sans"
           />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+        </div>
+
+        {/* Status and Severity Filters */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-mono text-slate-500">
+            <span>Status:</span>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-2 py-1.5 rounded border border-slate-200 bg-white text-xs font-mono text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="OPEN">Open</option>
+              <option value="ACKNOWLEDGED">Acknowledged</option>
+              <option value="RESOLVED">Resolved</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs font-mono text-slate-500">
+            <span>Severity:</span>
+            <select
+              value={selectedSeverity}
+              onChange={(e) => setSelectedSeverity(e.target.value)}
+              className="px-2 py-1.5 rounded border border-slate-200 bg-white text-xs font-mono text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
+            >
+              <option value="ALL">All Severities</option>
+              <option value="CRITICAL">Critical</option>
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Incidents Table */}
-      <div className="rounded-2xl bg-[#0d1527] border border-slate-800 overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/60 font-mono text-xs text-slate-400">
-                <th className="py-3 px-4">SEVERITY</th>
-                <th className="py-3 px-4">INCIDENT TITLE</th>
-                <th className="py-3 px-4">ZONE & CAMERA</th>
-                <th className="py-3 px-4">STATUS</th>
-                <th className="py-3 px-4">CONFIDENCE</th>
-                <th className="py-3 px-4">OCCURRENCES</th>
-                <th className="py-3 px-4">TIMESTAMP</th>
-                <th className="py-3 px-4 text-right">ACTION</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
-              {filteredIncidents.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-500 font-mono text-xs">
-                    {loading ? 'Loading incidents...' : 'No incidents matching selected criteria.'}
-                  </td>
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        {filteredIncidents.length === 0 ? (
+          <div className="p-12 text-center text-slate-500 text-xs font-mono">
+            {loading ? 'Querying incident repository...' : 'No incidents match active query filters.'}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-500 bg-slate-50/60 font-mono text-[11px]">
+                  <th className="py-2.5 px-4 font-medium">Incident ID</th>
+                  <th className="py-2.5 px-4 font-medium">Timestamp</th>
+                  <th className="py-2.5 px-4 font-medium">Designated Area</th>
+                  <th className="py-2.5 px-4 font-medium">Category</th>
+                  <th className="py-2.5 px-4 font-medium">Severity</th>
+                  <th className="py-2.5 px-4 font-medium">Status</th>
+                  <th className="py-2.5 px-4 font-medium">Assignee</th>
+                  <th className="py-2.5 px-4 font-medium">Actions</th>
                 </tr>
-              ) : (
-                filteredIncidents.map((inc) => (
-                  <tr
-                    key={inc.id}
-                    className="hover:bg-slate-900/50 transition cursor-pointer"
-                    onClick={() => handleOpenModal(inc)}
-                  >
-                    <td className="py-3.5 px-4">{getSeverityBadge(inc.severity)}</td>
-                    <td className="py-3.5 px-4 font-semibold text-white">
-                      <div className="flex items-center gap-2">
-                        <span>{inc.title}</span>
-                        {inc.is_demo && (
-                          <span className="px-1.5 py-0.5 text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800 rounded">
-                            DEMO
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-slate-400 line-clamp-1 mt-0.5 font-normal">
-                        {inc.observation_summary}
-                      </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {filteredIncidents.map((inc) => (
+                  <tr key={inc.id} className="hover:bg-slate-50/50 transition">
+                    <td className="py-2.5 px-4 font-mono font-semibold text-slate-900">INC-{inc.id}</td>
+                    <td className="py-2.5 px-4 font-mono text-[11px] text-slate-500">
+                      {new Date(inc.created_at || inc.last_detected_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-300">
-                      <div>Zone: #{inc.zone_id || 'N/A'}</div>
-                      <div className="text-slate-500 text-[11px]">Cam ID: {inc.camera_id}</div>
+                    <td className="py-2.5 px-4 font-mono text-slate-700">
+                      {inc.zone_id ? `Zone ${inc.zone_id}` : 'General Floor'}
                     </td>
-                    <td className="py-3.5 px-4">{getStatusBadge(inc.status)}</td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-cyan-300">
-                      {(inc.confidence * 100).toFixed(0)}%
+                    <td className="py-2.5 px-4 font-medium text-slate-900">{inc.title}</td>
+                    <td className="py-2.5 px-4">{getSeverityBadge(inc.severity)}</td>
+                    <td className="py-2.5 px-4">{getStatusBadge(inc.status)}</td>
+                    <td className="py-2.5 px-4 font-mono text-slate-600 text-[11px]">
+                      {inc.assigned_to || 'Unassigned'}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-400">
-                      {inc.occurrence_count}x
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-slate-400">
-                      {new Date(inc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-2.5 px-4">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenModal(inc);
-                        }}
-                        className="px-3 py-1 rounded bg-slate-800 hover:bg-cyan-600 text-slate-200 hover:text-white font-mono text-xs font-medium border border-slate-700 transition"
+                        onClick={() => handleOpenModal(inc)}
+                        className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-medium transition"
                       >
-                        Review
+                        Inspect
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Incident Review Modal Drawer */}
+      {/* Incident Detail Modal */}
       {activeIncident && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0b1220] border border-slate-700 shadow-2xl p-6 text-slate-200 space-y-6">
-            {/* Close button */}
-            <button
-              onClick={() => setActiveIncident(null)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl max-h-[90vh] rounded-lg bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-start justify-between pr-8">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  {getSeverityBadge(activeIncident.severity)}
-                  {getStatusBadge(activeIncident.status)}
-                  <span className="font-mono text-xs text-slate-500">
-                    INCIDENT #{activeIncident.id}
-                  </span>
-                </div>
-                <h2 className="text-xl font-bold text-white tracking-tight">
-                  {activeIncident.title}
-                </h2>
-                <div className="flex items-center gap-4 text-xs font-mono text-slate-400 mt-1">
-                  <span>Camera: #{activeIncident.camera_id}</span>
-                  <span>Zone: #{activeIncident.zone_id || 'N/A'}</span>
-                  <span>Confidence: {(activeIncident.confidence * 100).toFixed(1)}%</span>
-                  <span>Detected: {new Date(activeIncident.created_at).toLocaleString()}</span>
-                </div>
+            <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <span className="font-mono font-bold text-sm text-slate-900">INC-{activeIncident.id}</span>
+                {getSeverityBadge(activeIncident.severity)}
+                {getStatusBadge(activeIncident.status)}
               </div>
+              <button
+                onClick={() => setActiveIncident(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-slate-100 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* Observation and Evidence Card */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
-                <div className="text-xs font-mono text-cyan-400 flex items-center gap-1.5 font-bold">
-                  <Eye className="w-4 h-4" />
-                  OPTICAL OBSERVATION
+            {/* Modal Scrollable Body */}
+            <div className="p-5 overflow-y-auto space-y-4 text-xs">
+              {/* Evidence Snapshot */}
+              {activeIncident.evidence_path && (
+                <div>
+                  <span className="text-[11px] font-mono uppercase text-slate-500 font-semibold block mb-1.5">
+                    Visual Evidence Frame:
+                  </span>
+                  <div className="rounded border border-slate-200 overflow-hidden bg-slate-950 max-h-56 flex items-center justify-center">
+                    <img
+                      src={activeIncident.evidence_path}
+                      alt="Visual Evidence Snapshot"
+                      className="max-h-56 object-contain"
+                    />
+                  </div>
                 </div>
-                <p className="text-sm text-slate-300 leading-relaxed">
+              )}
+
+              {/* Observation Summary */}
+              <div className="p-3.5 rounded bg-slate-50 border border-slate-200 space-y-2">
+                <span className="text-[11px] font-mono uppercase text-slate-500 font-semibold block">
+                  Sensor Telemetry & Observation:
+                </span>
+                <p className="text-slate-800 font-medium">
                   {activeIncident.observation_summary}
                 </p>
-                <div className="pt-2 text-xs font-mono text-slate-500 flex items-center justify-between border-t border-slate-800/60">
-                  <span>Persistence Verified: YES</span>
-                  <span>Deduplicated Count: {activeIncident.occurrence_count}</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-[11px] text-slate-600">
+                  <div>Detected: <strong>{new Date(activeIncident.created_at || activeIncident.last_detected_at).toLocaleTimeString()}</strong></div>
+                  <div>Sensor: <strong>CAM-{activeIncident.camera_id}</strong></div>
+                  <div>Area: <strong>{activeIncident.zone_id ? `Zone ${activeIncident.zone_id}` : 'General'}</strong></div>
+                  <div>Occurrences: <strong>{activeIncident.occurrence_count} Records</strong></div>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
-                <div>
-                  <div className="text-xs font-mono text-rose-400 flex items-center gap-1.5 font-bold mb-2">
-                    <Camera className="w-4 h-4" />
-                    EVIDENCE ARTIFACT
+              {/* Retrieved Compliance Procedure */}
+              {activeIncident.retrieved_procedure && (
+                <div className="p-3.5 rounded bg-blue-50/50 border border-blue-200 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-mono uppercase text-blue-900 font-semibold">
+                      Standard Operating Procedure (RAG Grounded):
+                    </span>
+                    {activeIncident.citation_source && (
+                      <span className="text-[11px] font-mono text-blue-700">
+                        Source: {activeIncident.citation_source}
+                      </span>
+                    )}
                   </div>
-                  <div className="p-6 rounded-lg bg-slate-950 border border-dashed border-slate-800 flex flex-col items-center justify-center text-center">
-                    <Shield className="w-8 h-8 text-cyan-500/60 mb-2" />
-                    <div className="text-xs font-mono text-slate-300">
-                      {activeIncident.evidence_path
-                        ? `Stored: ${activeIncident.evidence_path}`
-                        : 'Evidence Reference Secured'}
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-1">
-                      SHA256 authenticated frame snapshot
-                    </div>
-                  </div>
+                  <p className="text-slate-800 text-xs leading-relaxed">
+                    {activeIncident.retrieved_procedure}
+                  </p>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Retrieved Standard Operating Procedure (SOP) */}
-            <div className="p-4 rounded-xl bg-slate-900/90 border border-cyan-900/40 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-mono text-cyan-300 flex items-center gap-1.5 font-bold">
-                  <FileText className="w-4 h-4" />
-                  GOVERNING COMPLIANCE PROCEDURE
-                </div>
-                {activeIncident.citation_source && (
-                  <span className="text-[11px] font-mono text-cyan-400/80 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">
-                    Source: {activeIncident.citation_source}
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-cyan-100 bg-slate-950/60 p-3 rounded-lg border border-cyan-900/30 leading-relaxed font-sans">
-                "{activeIncident.retrieved_procedure || 'Refer to General Facility Safety Standard Guidelines.'}"
-              </p>
-              <div className="text-xs text-slate-400 font-mono">
-                <span className="text-slate-300 font-bold">RECOMMENDED ACTION:</span> {activeIncident.recommended_action}
-              </div>
-            </div>
-
-            {/* Human Verification Workflow */}
-            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
-              <div className="text-xs font-mono text-white flex items-center gap-1.5 font-bold">
-                <UserCheck className="w-4 h-4 text-emerald-400" />
-                HUMAN REVIEW & WORKFLOW ACTIONS
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Reviewer & Resolution Input */}
+              <div className="space-y-3 pt-1 border-t border-slate-200">
                 <div>
-                  <label className="block text-xs font-mono text-slate-400 mb-1">
-                    ASSIGN SAFETY OFFICER
-                  </label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Assigned Investigator</label>
                   <input
                     type="text"
+                    placeholder="e.g. operator@nexus.ai"
                     value={assignedTo}
                     onChange={(e) => setAssignedTo(e.target.value)}
-                    placeholder="e.g. officer_marcus"
-                    className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-1.5 rounded border border-slate-300 text-xs font-mono text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-600"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-xs font-mono text-slate-400 mb-1">
-                    AUDIT / RESOLUTION NOTES
-                  </label>
-                  <input
-                    type="text"
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Investigation Notes & Actions</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Document root cause, containment actions, or safety sign-off..."
                     value={reviewNotes}
                     onChange={(e) => setReviewNotes(e.target.value)}
-                    placeholder="Document action taken or cause of false positive..."
-                    className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-1.5 rounded border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-600 font-sans"
                   />
                 </div>
               </div>
+            </div>
 
-              {/* Status Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800">
+            {/* Modal Action Bar */}
+            <div className="px-5 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-slate-500">
+                Status: {activeIncident.status}
+              </span>
+
+              <div className="flex items-center gap-2">
                 {activeIncident.status === 'OPEN' && (
-                  <>
-                    <button
-                      onClick={() => handleUpdateStatus('ACKNOWLEDGED')}
-                      disabled={isUpdating}
-                      className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-mono text-xs font-bold transition flex items-center gap-2"
-                    >
-                      <Clock className="w-3.5 h-3.5" />
-                      Acknowledge Incident
-                    </button>
-                    <button
-                      onClick={() => handleUpdateStatus('DISMISSED')}
-                      disabled={isUpdating}
-                      className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition"
-                    >
-                      Dismiss as False Alarm
-                    </button>
-                  </>
+                  <button
+                    onClick={() => handleUpdateStatus('ACKNOWLEDGED')}
+                    disabled={isUpdating}
+                    className="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium transition"
+                  >
+                    Acknowledge Incident
+                  </button>
                 )}
 
-                {activeIncident.status === 'ACKNOWLEDGED' && (
-                  <>
-                    <button
-                      onClick={() => handleUpdateStatus('RESOLVED')}
-                      disabled={isUpdating}
-                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition flex items-center gap-2"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Resolve & Close Incident
-                    </button>
-                    <button
-                      onClick={() => handleUpdateStatus('DISMISSED')}
-                      disabled={isUpdating}
-                      className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition"
-                    >
-                      Dismiss
-                    </button>
-                  </>
+                {activeIncident.status !== 'RESOLVED' && (
+                  <button
+                    onClick={() => handleUpdateStatus('RESOLVED')}
+                    disabled={isUpdating}
+                    className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition"
+                  >
+                    Mark Resolved
+                  </button>
                 )}
 
-                {(activeIncident.status === 'RESOLVED' || activeIncident.status === 'DISMISSED') && (
+                {activeIncident.status === 'RESOLVED' && (
                   <button
                     onClick={() => handleUpdateStatus('OPEN')}
                     disabled={isUpdating}
-                    className="px-4 py-2 rounded-lg bg-rose-600/80 hover:bg-rose-500 text-white font-mono text-xs font-bold transition flex items-center gap-2"
+                    className="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium transition"
                   >
-                    <AlertTriangle className="w-3.5 h-3.5" />
                     Reopen Incident
                   </button>
                 )}
 
-                {activeIncident.resolved_by && (
-                  <span className="text-xs font-mono text-emerald-400 ml-auto">
-                    Resolved by {activeIncident.resolved_by} at{' '}
-                    {new Date(activeIncident.resolved_at!).toLocaleTimeString()}
-                  </span>
-                )}
+                <button
+                  onClick={() => setActiveIncident(null)}
+                  className="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

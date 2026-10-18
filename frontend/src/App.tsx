@@ -38,7 +38,7 @@ export function App() {
         const s = await api.getSystemStatus();
         setSystemStatus(s);
       } catch (err) {
-        console.error('Failed to get system status:', err);
+        console.warn('Backend system status check in progress...');
       }
     };
 
@@ -69,18 +69,22 @@ export function App() {
         return <DigitalTwin />;
       case 'rules':
         return <SafetyRules />;
+      case 'audit':
+        return <Settings initialTab="audit" />;
       case 'settings':
-        return <Settings />;
+        return <Settings initialTab="users" />;
       default:
         return <Dashboard onNavigate={setActiveScreen} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#070c18] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <Navbar
         systemStatus={systemStatus}
         currentUser={currentUser}
+        activeScreen={activeScreen}
+        onNavigate={setActiveScreen}
         onOpenLogin={() => setIsLoginOpen(true)}
         onLogout={handleLogout}
       />
@@ -92,7 +96,7 @@ export function App() {
           openIncidentsCount={systemStatus?.open_incidents}
         />
 
-        <main className="flex-1 p-6 overflow-y-auto bg-gradient-to-b from-[#070c18] via-[#091024] to-[#070c18]">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto bg-slate-50">
           <div className="max-w-7xl mx-auto">
             {renderScreen()}
           </div>

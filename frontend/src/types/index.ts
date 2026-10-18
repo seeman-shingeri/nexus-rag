@@ -82,6 +82,7 @@ export type ActiveScreen =
   | 'ask' 
   | 'twin' 
   | 'rules' 
+  | 'audit'
   | 'settings';
 
 export type IncidentStatus = 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED' | 'DISMISSED';

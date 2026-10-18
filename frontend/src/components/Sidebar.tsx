@@ -1,16 +1,16 @@
 import React from 'react';
 import { 
-  Activity, 
-  Camera, 
-  BookOpen, 
+  LayoutDashboard, 
+  Video, 
   AlertTriangle, 
-  MessageSquareCode, 
+  FileText, 
+  MessageSquare, 
   Layers, 
-  ShieldCheck, 
+  SlidersHorizontal, 
+  History,
   Settings,
   ChevronLeft,
-  ChevronRight,
-  Wifi
+  ChevronRight
 } from 'lucide-react';
 import { ActiveScreen } from '../types';
 
@@ -28,32 +28,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [collapsed, setCollapsed] = React.useState(false);
 
   const navItems: { id: ActiveScreen; label: string; icon: React.FC<{ className?: string }>; badge?: number }[] = [
-    { id: 'dashboard', label: 'Overview Dashboard', icon: Activity },
-    { id: 'vision', label: 'Live Vision', icon: Camera },
-    { id: 'knowledge', label: 'Knowledge Base', icon: BookOpen },
-    { id: 'incidents', label: 'Incident Center', icon: AlertTriangle, badge: openIncidentsCount },
-    { id: 'ask', label: 'Ask NEXUS', icon: MessageSquareCode },
+    { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
+    { id: 'vision', label: 'Live Vision', icon: Video },
+    { id: 'incidents', label: 'Incidents', icon: AlertTriangle, badge: openIncidentsCount },
+    { id: 'knowledge', label: 'Knowledge Base', icon: FileText },
+    { id: 'ask', label: 'Ask NEXUS', icon: MessageSquare },
     { id: 'twin', label: 'Digital Twin', icon: Layers },
-    { id: 'rules', label: 'Safety Rules', icon: ShieldCheck },
-    { id: 'settings', label: 'Settings & Security', icon: Settings },
+    { id: 'rules', label: 'Safety Rules', icon: SlidersHorizontal },
+    { id: 'audit', label: 'Audit Log', icon: History },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   return (
     <aside 
-      className={`bg-[#0a0f1d] border-r border-slate-800 transition-all duration-300 flex flex-col justify-between select-none ${
-        collapsed ? 'w-20' : 'w-64'
+      className={`bg-white border-r border-slate-200 transition-all duration-200 flex flex-col justify-between select-none ${
+        collapsed ? 'w-16' : 'w-56'
       }`}
     >
-      {/* Navigation Links */}
-      <div className="p-3 space-y-1.5">
-        <div className="flex items-center justify-between px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-slate-500">
-          {!collapsed && <span>Operations Hub</span>}
+      {/* Navigation Items */}
+      <div className="p-2 space-y-0.5">
+        <div className="flex items-center justify-between px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-600 mb-1">
+          {!collapsed && <span>Operations</span>}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1 hover:text-slate-300 hover:bg-slate-800 rounded transition ml-auto"
-            title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition ml-auto"
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
           </button>
         </div>
 
@@ -65,14 +67,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => onSelectScreen(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-lg text-sm font-medium transition group relative ${
+              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded text-xs transition relative font-medium ${
                 isActive
-                  ? 'bg-gradient-to-r from-cyan-950/80 to-slate-900 text-cyan-300 border border-cyan-800/60 shadow-glow-cyan'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                  ? 'bg-slate-100 text-slate-900 border-l-2 border-blue-600 font-semibold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              <Icon className={`w-5 h-5 flex-shrink-0 transition ${
-                isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200'
+              <Icon className={`w-4 h-4 flex-shrink-0 ${
+                isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
               }`} />
               
               {!collapsed && (
@@ -80,32 +82,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
 
               {item.badge !== undefined && item.badge > 0 && (
-                <span className={`px-1.5 py-0.5 text-[11px] font-mono rounded-full font-bold ${
-                  collapsed ? 'absolute top-2 right-2' : ''
-                } bg-rose-600 text-white animate-pulse`}>
+                <span className={`px-1.5 py-0.2 text-[10px] font-mono rounded font-semibold ${
+                  collapsed ? 'absolute top-1.5 right-1.5' : ''
+                } bg-red-100 text-red-700 border border-red-200`}>
                   {item.badge}
                 </span>
-              )}
-
-              {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-cyan-400 rounded-r" />
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Footer / Telemetry ping */}
-      <div className="p-4 border-t border-slate-800/80">
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-          <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-          {!collapsed && (
-            <div className="flex justify-between w-full">
-              <span>LATENCY</span>
-              <span className="text-emerald-400 font-semibold">12 ms</span>
+      {/* Footer / System Specification */}
+      <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+        {!collapsed ? (
+          <div className="space-y-1 text-[11px] font-mono text-slate-600">
+            <div className="flex justify-between items-center">
+              <span>PLATFORM</span>
+              <span className="text-slate-700 font-medium">NEXUS Core v1.0</span>
             </div>
-          )}
-        </div>
+            <div className="flex justify-between items-center">
+              <span>MODE</span>
+              <span className="text-slate-700 font-medium">Multimodal RAG</span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center font-mono text-[10px] text-slate-600">v1.0</div>
+        )}
       </div>
     </aside>
   );
