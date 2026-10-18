@@ -122,4 +122,19 @@ This log maintains an audit trail of every logically independent contribution co
 - **Push Verification**: Verified on remote `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
 - **Status**: Completed and Verified
 
+### Milestone 8: Facility Digital Twin, Spatial Anomaly Detection, and Discrepancy Inspector
+- **Date**: 2026-10-18
+- **Contribution**: `feat: implement digital twin facility map and spatial discrepancy detection`
+- **Scope**:
+  - Implemented spatial discrepancy evaluation engine (`twin_service.py`) comparing fresh optical observations against configured zone baselines.
+  - Implemented detection logic for unauthorized entry into restricted security zones, capacity limit exceedances, active visual hazard discrepancies, and missing physical safety assets.
+  - Built REST API endpoints (`/api/v1/digital-twin/state`, `/api/v1/digital-twin/zones/{zone_id}`, and `/api/v1/digital-twin/evaluate`) with Pydantic v2 serialization schemas.
+  - Authored automated test suite `test_digital_twin.py` verifying optimal facility state, unauthorized security breach detection, and API endpoints.
+  - Built interactive 2D facility schematic frontend (`DigitalTwin.tsx`) featuring color-coded status boundaries, occupancy meters, restricted security pills, and interactive zone deep-dive inspector with baseline vs. observed telemetry comparisons.
+- **Automated Tests / Checks**: 30 backend tests passed in 33.66s; frontend production build (`npm run build`) succeeded in 3.95s.
+- **Commit Hash**: `3845faa917c103cbf95fcbdd85fde460fe1af91e`
+- **Push Verification**: Verified on remote `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
+- **Status**: Completed and Verified
+
+
 
