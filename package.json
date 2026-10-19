@@ -10,6 +10,6 @@
     "build": "npm --prefix frontend run build",
     "dev": "npm --prefix frontend run dev",
     "start": "npm --prefix frontend run preview",
-    "test:frontend": "npm --prefix frontend run build"
+    "test:frontend": "node --test frontend/src/tests/*.test.mjs && npm --prefix frontend run build"
   }
 }

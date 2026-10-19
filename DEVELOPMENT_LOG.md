@@ -201,6 +201,22 @@ This log maintains an audit trail of every logically independent contribution co
 - **Push Verification**: Remote push verified on `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
 - **Status**: Completed and Verified
 
+### Milestone 13: Live Vision Camera Initialization Bug Fix & Lifecycle Hardening
+- **Date**: 2026-10-19
+- **Contribution**: `fix(vision): resolve camera initialization bug, enforce visible MediaStream playback, and harden error/lifecycle handling`
+- **Scope**:
+  - **Root Cause Resolution**: Identified that `<video ref={videoRef}>` was styled with `className="hidden"` and was awaiting an asynchronous `currentFrameUrl` response from the backend before displaying an `<img>`. When backend processing was slow or offline (such as on cloud SPA deployments), the UI remained stuck on the "CAMERA STREAM INACTIVE" standby screen despite browser camera permissions being granted.
+  - **Direct Visible Playback**: Bound `video.srcObject` directly to the `<video>` element with `className="w-full h-full object-contain block"`, `autoPlay`, `muted`, and `playsInline`.
+  - **Lifecycle & Metadata Awaiting**: Added explicit awaiting of `loadedmetadata` with dimensions validation (`videoWidth > 0`), graceful promise awaiting for `video.play()` handling `AbortError`, and track settings resolution extraction.
+  - **Error Mapping & Resilience**: Added handling and distinct user-friendly error banners for `NotAllowedError` (permission denied), `NotFoundError` (no hardware), `NotReadableError` (hardware busy), `OverconstrainedError` (resolution constraint fallback), and insecure origin detection (`window.isSecureContext`).
+  - **Clean Termination & React Strict Mode Protection**: Implemented sequence token guards (`initSeqRef`), active track termination across `activeStreamRef` and `videoRef`, unmount listeners cleanup, and clean restart mechanisms.
+  - **Separation of Perception & Camera Telemetry**: Separated camera stream status from perception inference status (`Inference Active`, `Connecting`, `Raw Stream (Inference Offline)`). Removed fabricated latency and FPS; measured true rolling frame rates and API response latencies.
+  - **Automated Lifecycle Unit Test Suite**: Added 9 automated unit tests in `frontend/src/tests/camera_lifecycle.test.mjs` running via native `node --test` covering startup, constraints fallback, error states, unmount cleanup, and restarts.
+- **Automated Tests / Checks**: 9/9 camera lifecycle tests passed; 32/32 backend pytest tests passed; clean frontend production build (`npm run test:frontend`) passed in 2.97s.
+- **Push Verification**: Remote push verified on `https://github.com/seeman-shingeri/nexus-rag.git` branch `main`.
+- **Status**: Completed and Verified
+
+
 
 
 
